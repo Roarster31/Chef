@@ -1,8 +1,7 @@
-var xmlToJSON = require("xmltojson");
-var testString = '<xml><a>It Works!</a></xml>';      
-var result = xmlToJSON.parseString(testString); // parseString cannot be found??
+var parser = require("xml2json");
+var testString = '<xml><a>It Works!</a></xml>';     
+var result = parser.toJson(testString); // parseString cannot be found??
 console.log(testString + " " + result);
-
 
 
 
