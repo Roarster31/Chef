@@ -4,8 +4,8 @@ var http = require("http"),
 	urlParser = require("url");
 
 module.exports = {
-	searchEan: function(ean, callback) {
-		return searchEan(ean, callback);
+	searchEan: function(ean, success, failure) {
+		return searchEan(ean, success, failure);
 	}
 };
 
@@ -19,7 +19,7 @@ var baseRequest = request.defaults({
 	gzip: true
 })
 
-searchEan = function(ean, callback) {
+searchEan = function(ean, success, failure) {
 
 	var url = "http://www.ean-search.org/perl/ean-search.pl?q=" + ean;
 
@@ -37,36 +37,43 @@ searchEan = function(ean, callback) {
 
 			var $ = cheerio.load(body);
 
-			var found = false;
+			var anchorFound = false;
+			var text;
 
 			//we want the text after "product name for [ean #]" because they've been moderately clever and not used any ids.
 			//Luckily for us they ALWAYS show "product name for [ean #]" even if they don't have a product, so we can use it as an anchor.
 			$("p").each(function(i, elem) {
 
-				if (found) {
-					var text = $(this).text().trim();
+				if (anchorFound) {
 
 					//if the text after "product name for [ean #]" is "results: 0" it couldn't find anything :'(
-					if (text.toLowerCase().indexOf("results: 0") == -1) {
-						console.log("ean product: " + text.trim());
-						if (callback != undefined) {
-							callback(text);
-						}
-					}else{
-						if (callback != undefined) {
-							callback(undefined);
-						}
+					if ($(this).text().trim().toLowerCase().indexOf("results: 0") == -1) {
+						text = $(this).text().trim();
 					}
 					return false;
 				} else if ($(this).text().toLowerCase().indexOf("product name for") != -1) {
-					found = true;
+					anchorFound = true;
 				}
 
 			});
 
+			if(text != undefined){
+				if (success != undefined) {
+							success(text);
+						}
+			}else{
+				if (success != undefined) {
+							success(undefined);
+						}
+			}
+
 		} else {
 			console.log("Error " + response.statusCode + "\n\n");
 			console.log(body);
+
+			if(failure != undefined){
+				failure("Decept daily ip quota limit triggered");
+			}
 		}
 	});
 

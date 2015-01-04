@@ -8,8 +8,8 @@ var http = require("http"),
 	urlParser = require("url");
 
 module.exports = {
-  searchForProductIngredients: function (product, callback) {
-    return searchForProductIngredients(product, callback);
+  searchForProductIngredients: function (product, success, failure) {
+    return searchForProductIngredients(product, success, failure);
   }
 };
 
@@ -96,6 +96,7 @@ parseLinkIndex = function(links, index, success) {
 	//if we've called this recursively and we've run out of items we should Error out
 	if (links.length < index) {
 		console.log("Error: Ran out of options!");
+		success(undefined, undefined);
 		return false;
 	}
 
@@ -112,7 +113,7 @@ parseLinkIndex = function(links, index, success) {
 			if (ingredients.length <= 0) {
 				console.log("trying next link \n\n");
 
-				parseLinkIndex(links, (index + 1));
+				parseLinkIndex(links, (index + 1), success);
 			}else if(success != undefined){
 				success(ingredients, links[index].pagemap.cse_image[0].src);
 			}
@@ -120,13 +121,13 @@ parseLinkIndex = function(links, index, success) {
 			console.log("error fetching " + link + "\n\n");
 
 			//we could have encountered an error for numerous reasons, we'll just try the next link
-			parseLinkIndex(links, (index + 1));
+			parseLinkIndex(links, (index + 1), success);
 		}
 	});
 
 }
 
-searchForProductIngredients = function (productName, success) {
+searchForProductIngredients = function (productName, success, failure) {
 
 var url = "https://www.googleapis.com/customsearch/v1?key=AIzaSyBPQh3L3yqwrvzm4tSV4sBgBakCpt-IQ2g&cx=006662848666275934582:hm0cll0o6jg&q=" + encodeURIComponent(productName) + "&fields=items(title,link,pagemap(cse_image))";
 
@@ -138,6 +139,14 @@ baseRequest(url, function(error, response, body) {
 		parseLinkIndex(JSON.parse(body).items, 0, success);
 
 
+	}else{
+		console.log("Error\n");
+		console.log(body);
+		if(response.statusCode == 403){
+			if(failure != undefined){
+				failure("Google daily quota limit reached");
+			}
+		}
 	}
 });
 

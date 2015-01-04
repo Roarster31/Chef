@@ -5,9 +5,15 @@ var app = express()
 
 app.get('/', function(req, res) {
 
-	var result = { errors:null};
+	var result = { errors:[]};
 
 	console.log("searching ean records for: " + req.query.ean + "\n\n");
+
+	if(req.query.ean == undefined){
+		result.errors.push("You must pass an ean number");
+		res.send(result);
+		return;
+	}
 
 	result.ean = req.query.ean;
 
@@ -33,9 +39,21 @@ app.get('/', function(req, res) {
 			result.ingredients = ingredients;
 			res.send(result);
 
+		}, function (reason){
+
+			result.errors.push(reason);
+
+			res.send(result);
+
 		});
 
-	});
+	}, function (reason){
+
+			result.errors.push(reason);
+
+			res.send(result);
+
+		});
 })
 
 var server = app.listen(3110, function() {
