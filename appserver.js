@@ -71,12 +71,12 @@ app.get('/', function(req, res) {
 
 	var googleSearchCallback = function(err, ingredients, image) {
 
-		if (err && result.ingredients == undefined) {
+		if (result.ingredients == undefined && err) {
 			console.log("Google search failed");
 			result.errors.push(err);
 			res.send(result);
 			return;
-		} else if (ingredients.length <= 0 && result.ingredients == undefined) {
+		} else if (result.ingredients == undefined && ingredients.length <= 0) {
 			console.log("Google search did not produce any ingredients");
 			result.errors.push("Could not find product ingredients");
 		} else {
