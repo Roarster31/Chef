@@ -4,8 +4,8 @@ var http = require("http"),
 	urlParser = require("url");
 
 module.exports = {
-	searchEan: function(ean, success, failure) {
-		return searchEan(ean, success, failure);
+	searchEan: function(ean, callback) {
+		return searchEan(ean, callback);
 	}
 };
 
@@ -19,7 +19,7 @@ var baseRequest = request.defaults({
 	gzip: true
 })
 
-searchEan = function(ean, success, failure) {
+searchEan = function(ean, callback) {
 
 	var url = "http://www.ean-search.org/perl/ean-search.pl?q=" + ean;
 
@@ -58,12 +58,12 @@ searchEan = function(ean, success, failure) {
 			});
 
 			if(text != undefined){
-				if (success != undefined) {
-							success(text);
+				if (callback != undefined) {
+							callback(null, text);
 						}
 			}else{
-				if (success != undefined) {
-							success(undefined);
+				if (callback != undefined) {
+							callback("not found");
 						}
 			}
 
@@ -71,8 +71,8 @@ searchEan = function(ean, success, failure) {
 			console.log("Error " + response.statusCode + "\n\n");
 			console.log(body);
 
-			if(failure != undefined){
-				failure("Decept daily ip quota limit triggered");
+			if(callback != undefined){
+				callback("Decept daily ip quota limit triggered");
 			}
 		}
 	});

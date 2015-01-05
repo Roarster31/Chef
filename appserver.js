@@ -1,15 +1,19 @@
 var express = require('express'),
+	eanTool = require('async'),
 	eanTool = require('./clEANer'),
+	digitiserTool = require('./digitiser'),
 	ingredientsTool = require('./nodebase')
 var app = express()
 
 app.get('/', function(req, res) {
 
-	var result = { errors:[]};
+	var result = {
+		errors: []
+	};
 
 	console.log("searching ean records for: " + req.query.ean + "\n\n");
 
-	if(req.query.ean == undefined){
+	if (req.query.ean == undefined) {
 		result.errors.push("You must pass an ean number");
 		res.send(result);
 		return;
@@ -17,44 +21,84 @@ app.get('/', function(req, res) {
 
 	result.ean = req.query.ean;
 
-	eanTool.searchEan(req.query.ean, function(product) {
+	var digitiserRequestComplete = eantoolRequestComplete = googleRequestStarted = false;
 
-		if(product == undefined){
-			result.errors.push("Could not find ean product");
+	console.log("beginning digit-eyes search");
+	digitiserTool.superSearch(req.query.ean, function(err, productName, ingredients) {
+		digitiserRequestComplete = true;
+
+		if (err && eantoolRequestComplete && !googleRequestStarted) {
+			console.log("both ean searches failed");
+			result.errors.push(err);
 			res.send(result);
 			return;
+		} else if (!err) {
+			console.log("digit-eyes search succeeded");
+			result.productName = productName;
+			result.ingredients = ingredients;
+			result.ingredientsSource = "digit-eyes";
+			result.productNameSource = "digit-eyes";
+
+			if(!googleRequestStarted){
+				googleRequestStarted = true;
+				console.log("beginning Google search (from digit-eyes)");
+				ingredientsTool.searchForProductIngredients(productName, googleSearchCallback);
+			}
 		}
 
-		console.log("product found: " + product + "\n\n");
+	});
 
-		result.productName = product;
+	console.log("beginning ean-search search");
+	eanTool.searchEan(req.query.ean, function(err, productName) {
+		eantoolRequestComplete = true;
 
-		ingredientsTool.searchForProductIngredients(product, function(ingredients, image) {
+		if (err && digitiserRequestComplete && !googleRequestStarted) {
+			console.log("both ean searches failed");
+			result.errors.push(err);
+			res.send(result);
+			return;
+		} else if (!err) {
+			console.log("ean-search search succeeded");
+			result.productName = productName;
+			result.productNameSource = "ean-search";
 
-			if(ingredients.length <= 0){
+			if(!googleRequestStarted){
+				googleRequestStarted = true;
+				console.log("beginning Google search (from ean-search)");
+				ingredientsTool.searchForProductIngredients(productName, googleSearchCallback);
+			}
+		}
+
+	});
+
+	var googleSearchCallback = function(err, ingredients, image) {
+
+		if (err && result.ingredients == undefined) {
+			console.log("Google search failed");
+			result.errors.push(err);
+			res.send(result);
+			return;
+		} else if (ingredients.length <= 0 && result.ingredients == undefined) {
+			console.log("Google search did not produce any ingredients");
 			result.errors.push("Could not find product ingredients");
+		} else {
+			console.log("Google search succeeded");
+			result.productImage = image;
+			result.productImageSource = "Google";
+
+			if(result.ingredients == undefined){
+				result.ingredients = ingredients;
+				result.ingredientsSource = "Google";
 			}
 
-			result.productImage = image;
-			result.ingredients = ingredients;
 			res.send(result);
+		}
 
-		}, function (reason){
+	};
 
-			result.errors.push(reason);
 
-			res.send(result);
-
-		});
-
-	}, function (reason){
-
-			result.errors.push(reason);
-
-			res.send(result);
-
-		});
 })
+
 
 var server = app.listen(3110, function() {
 
