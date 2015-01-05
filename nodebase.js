@@ -94,7 +94,7 @@ findIngredients = function(body) {
 parseLinkIndex = function(links, index, callback) {
 
 	//if we've called this recursively and we've run out of items we should Error out
-	if (links.length < index) {
+	if (links.length < index || links[index]) {
 		console.log("Error: Ran out of options!");
 		callback("Could not find product");
 		return false;

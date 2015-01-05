@@ -2,8 +2,7 @@ var http = require("http"),
 	request = require('request'),
 	cheerio = require("cheerio"),
 	urlParser = require("url"),
-	crypto = require('crypto'),
-	shasum = crypto.createHmac('sha1', 'Qp89Y8a1o9St1Ml4');
+	crypto = require('crypto');
 
 module.exports = {
   superSearch: function (ean, callback) {
@@ -14,7 +13,7 @@ module.exports = {
 
 superSearch = function (ean, callback) {
 
-	shasum.update(ean);
+	shasum = crypto.createHmac('sha1', 'Qp89Y8a1o9St1Ml4').update(ean);
 
 	var url = "http://digit-eyes.com/gtin/v2_0/?upc_code="+ean+"&app_key=//JWrdQNLa0v&signature="+shasum.digest("base64")+"&language=en&field_names=description,ingredients";
 
@@ -22,7 +21,11 @@ superSearch = function (ean, callback) {
 	request(url, function(error, response, body) {
 		if (!error && response.statusCode == 200) {
 			var productName = JSON.parse(body).description;
-			var ingredients = JSON.parse(body).ingredients.split(",").map(function(text){ return text.trim(); });
+			var ingredients;
+
+			if(JSON.parse(body).ingredients != undefined){
+			 ingredients = JSON.parse(body).ingredients.split(",").map(function(text){ return text.trim(); });
+			}
 
 			if(callback != undefined){
 				callback(null, productName, ingredients);

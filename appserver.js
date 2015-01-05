@@ -8,7 +8,8 @@ var app = express()
 app.get('/', function(req, res) {
 
 	var result = {
-		errors: []
+		errors: [],
+		sources: {}
 	};
 
 	console.log("searching ean records for: " + req.query.ean + "\n\n");
@@ -21,55 +22,52 @@ app.get('/', function(req, res) {
 
 	result.ean = req.query.ean;
 
-	var digitiserRequestComplete = eantoolRequestComplete = googleRequestStarted = false;
-
 	console.log("beginning digit-eyes search");
 	digitiserTool.superSearch(req.query.ean, function(err, productName, ingredients) {
-		digitiserRequestComplete = true;
 
-		if (err && eantoolRequestComplete && !googleRequestStarted) {
-			console.log("both ean searches failed");
-			result.errors.push(err);
-			res.send(result);
+		if (err) {
+			console.log("digit-eyes search failed");
+			secondarySearch();
 			return;
-		} else if (!err) {
+		} else {
 			console.log("digit-eyes search succeeded");
 			result.productName = productName;
 			result.ingredients = ingredients;
-			result.ingredientsSource = "digit-eyes";
-			result.productNameSource = "digit-eyes";
+			result.sources.ingredients = "digit-eyes";
+			result.sources.name = "digit-eyes";
 
-			if(!googleRequestStarted){
-				googleRequestStarted = true;
+
 				console.log("beginning Google search (from digit-eyes)");
 				ingredientsTool.searchForProductIngredients(productName, googleSearchCallback);
-			}
+
 		}
 
 	});
 
-	console.log("beginning ean-search search");
-	eanTool.searchEan(req.query.ean, function(err, productName) {
-		eantoolRequestComplete = true;
+	var secondarySearch = function() {
+		console.log("beginning ean-search search");
+		eanTool.searchEan(req.query.ean, function(err, productName) {
 
-		if (err && digitiserRequestComplete && !googleRequestStarted) {
-			console.log("both ean searches failed");
-			result.errors.push(err);
-			res.send(result);
-			return;
-		} else if (!err) {
-			console.log("ean-search search succeeded");
-			result.productName = productName;
-			result.productNameSource = "ean-search";
+			if (err) {
+				console.log("secondary search failed");
+				result.errors.push(err);
+				res.send(result);
+				return;
+			} else {
+				console.log("ean-search search succeeded");
+				result.productName = productName;
+				result.sources.name = "ean-search";
 
-			if(!googleRequestStarted){
-				googleRequestStarted = true;
-				console.log("beginning Google search (from ean-search)");
-				ingredientsTool.searchForProductIngredients(productName, googleSearchCallback);
+
+
+					console.log("beginning Google search (from ean-search)");
+					ingredientsTool.searchForProductIngredients(productName, googleSearchCallback);
+
 			}
-		}
 
-	});
+		});
+
+	}
 
 	var googleSearchCallback = function(err, ingredients, image) {
 
@@ -84,11 +82,11 @@ app.get('/', function(req, res) {
 		} else {
 			console.log("Google search succeeded");
 			result.productImage = image;
-			result.productImageSource = "Google";
+			result.sources.image = "Google";
 
-			if(result.ingredients == undefined){
+			if (result.ingredients == undefined) {
 				result.ingredients = ingredients;
-				result.ingredientsSource = "Google";
+				result.sources.ingredients = "Google";
 			}
 
 			res.send(result);
