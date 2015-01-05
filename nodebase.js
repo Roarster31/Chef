@@ -27,18 +27,36 @@ findIngredients = function(body) {
 	var ingredients = [];
 
 	//firstly we look for text elements containing "ingredient". We want an "ingredient" heading because logically the list of ingredients should follow closely after.
-	$("p, h1, h2, h3").filter(function(i, elem) {
+	$("div, p, h1, h2, h3").filter(function(i, elem) {
 		//we filter the resulting elements to those with text of length shorter than the length of "ingredient"*2. This leaves heading and filters paragraphs.
 		var text = $(elem).text().toLowerCase();
-		return text.indexOf("ingredient") != -1 && text.length < "ingredient".length * 2;
+		return (text.indexOf("ingredients") != -1 && text.length < "ingredient".length * 2) || text.indexOf("ingredients:") != -1;
 	}).each(function(i, elem) {
-
 
 		var found = false;
 
+		//this is for the case where the text is just part of a huge block of text
+		if($(elem).text().toLowerCase().indexOf("ingredients:") != -1 && $(elem).text().length > "ingredient".length * 2){
+			var lines = $(elem).text().split('\n');
+			var found = false;
+
+			for(var i=0; i<lines.length; i++){
+
+				if(found && lines[i].trim().length > 0){
+					ingredients = lines[i].split(",").map(function(text) {
+						return text.trim().replace(/,+$/, "");
+					});
+					break;
+				}else if(!found){
+					found = lines[i].toLowerCase().indexOf("ingredients:") != -1;
+				}
+			}
+
+		}else{
+
 		//Then we go through "ul, p, h1, h2, h3" in the heading's parent. We wait until we find the heading, then set found to true.
 		//Then the following text in the DOM is assumed to be the list of ingredients unless it contains the keyword "allergy".
-		$(elem).parent().find("ul, p, h1, h2, h3").each(function(j, el) {
+		$(elem).parent().find("div, ul, p, h1, h2, h3").each(function(j, el) {
 
 
 			if (found) {
@@ -68,6 +86,7 @@ findIngredients = function(body) {
 				found = el == elem;
 			}
 		});
+		}
 
 		if (ingredients.length > 0) {
 			return false;
@@ -94,7 +113,7 @@ findIngredients = function(body) {
 parseLinkIndex = function(links, index, callback) {
 
 	//if we've called this recursively and we've run out of items we should Error out
-	if (links.length < index || links[index]) {
+	if (links.length < index || links[index] == undefined) {
 		console.log("Error: Ran out of options!");
 		callback("Could not find product");
 		return false;
@@ -131,6 +150,8 @@ searchForProductIngredients = function (productName, callback) {
 
 var url = "https://www.googleapis.com/customsearch/v1?key=AIzaSyBPQh3L3yqwrvzm4tSV4sBgBakCpt-IQ2g&cx=006662848666275934582:hm0cll0o6jg&q=" + encodeURIComponent(productName) + "&fields=items(title,link,pagemap(cse_image))";
 
+console.log("fetching "+url);
+
 //go off and get the Google search result for the url
 baseRequest(url, function(error, response, body) {
 	if (!error && response.statusCode == 200) {
@@ -151,3 +172,4 @@ baseRequest(url, function(error, response, body) {
 });
 
 }
+
