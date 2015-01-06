@@ -1,5 +1,4 @@
 var express = require('express'),
-	eanTool = require('async'),
 	eanTool = require('./clEANer'),
 	digitiserTool = require('./digitiser'),
 	ingredientsTool = require('./nodebase')
