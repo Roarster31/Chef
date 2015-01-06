@@ -82,7 +82,7 @@ public class MainActivity extends ActionBarActivity implements MainActivityInter
             Toast.makeText(this, "Please set the server ip in settings", Toast.LENGTH_LONG).show();
         } else {
 
-            final String url = "http://" + serverIp + ":3110?ean="+eanCode;
+            final String url = "http://" + serverIp + ":6128?ean="+eanCode;
 
             final OkHttpClient client = new OkHttpClient();
 
