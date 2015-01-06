@@ -5,5 +5,6 @@
         android:key="pref_key_server_ip"
         android:summary="@string/pref_summary_server_ip"
         android:title="@string/pref_title_server_ip"
+        android:defaultValue="smithyproductions.noip.me"
         />
 </PreferenceScreen>

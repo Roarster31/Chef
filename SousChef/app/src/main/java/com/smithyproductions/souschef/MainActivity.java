@@ -76,7 +76,7 @@ public class MainActivity extends ActionBarActivity implements MainActivityInter
         fragmentTransaction.commit();
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        String serverIp = sharedPref.getString("pref_key_server_ip", null);
+        String serverIp = sharedPref.getString("pref_key_server_ip", "smithyproductions.noip.me");
 
         if (serverIp == null) {
             Toast.makeText(this, "Please set the server ip in settings", Toast.LENGTH_LONG).show();
