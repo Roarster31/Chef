@@ -1,7 +1,7 @@
 var express = require('express'),
-	eanTool = require('./eanSearch'),
-	digitiserTool = require('./eanSearchV2'),
-	ingredientsTool = require('./productDataSearch')
+	eanSearch = require('./eanSearch'),
+	eanSearchV2 = require('./eanSearchV2'),
+	productSearch = require('./productDataSearch')
 var app = express()
 
 app.get('/', function(req, res) {
@@ -21,8 +21,10 @@ app.get('/', function(req, res) {
 
 	result.ean = req.query.ean;
 
+	//this is our primary ean search api. If it fails we use the backup. We use this as
+	//our primary search because it can also return ingredients
 	console.log("beginning digit-eyes search");
-	digitiserTool.superSearch(req.query.ean, function(err, productName, ingredients) {
+	eanSearchV2.superSearch(req.query.ean, function(err, productName, ingredients) {
 
 		if (err) {
 			console.log("digit-eyes search failed");
@@ -31,21 +33,25 @@ app.get('/', function(req, res) {
 		} else {
 			console.log("digit-eyes search succeeded");
 			result.productName = productName;
-			result.ingredients = ingredients;
-			result.sources.ingredients = "digit-eyes";
 			result.sources.name = "digit-eyes";
+
+			if(result.ingredients){
+				result.ingredients = ingredients;
+				result.sources.ingredients = "digit-eyes";
+			}
 
 
 				console.log("beginning Google search (from digit-eyes)");
-				ingredientsTool.searchForProductIngredients(productName, googleSearchCallback);
+				productSearch.searchForProductIngredients(productName, googleSearchCallback);
 
 		}
 
 	});
 
+	//this is a backup ean search that we fall back to if the primary search fails
 	var secondarySearch = function() {
 		console.log("beginning ean-search search");
-		eanTool.searchEan(req.query.ean, function(err, productName) {
+		eanSearch.searchEan(req.query.ean, function(err, productName) {
 
 			if (err) {
 				console.log("secondary search failed");
@@ -60,7 +66,7 @@ app.get('/', function(req, res) {
 
 
 					console.log("beginning Google search (from ean-search)");
-					ingredientsTool.searchForProductIngredients(productName, googleSearchCallback);
+					productSearch.searchForProductIngredients(productName, googleSearchCallback);
 
 			}
 
