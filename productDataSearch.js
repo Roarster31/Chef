@@ -8,8 +8,8 @@ var http = require("http"),
 	urlParser = require("url");
 
 module.exports = {
-  searchForProductIngredients: function (product, callback) {
-    return searchForProductIngredients(product, callback);
+  searchForProductIngredients: function (product, fetchIngredients, callback) {
+    return searchForProductIngredients(product, fetchIngredients, callback);
   }
 };
 
@@ -110,13 +110,17 @@ findIngredients = function(body) {
 
 }
 
-parseLinkIndex = function(links, index, callback) {
+parseLinkIndex = function(links, index, fetchIngredients, callback) {
 
 	//if we've called this recursively and we've run out of items we should Error out
 	if (links.length < index || links[index] == undefined) {
 		console.log("Error: Ran out of options!");
-		callback("Could not find product");
-		return false;
+		return callback("Could not find product");
+	}
+
+	if(!fetchIngredients){
+		console.log("taking shortcut and avoiding ingredient search as we already have ingredients");
+		return callback(null, null, links[index].pagemap.cse_image[0].src);
 	}
 
 	//we know at this point we won't get an index out of bounds
@@ -132,21 +136,21 @@ parseLinkIndex = function(links, index, callback) {
 			if (ingredients.length <= 0) {
 				console.log("trying next link \n\n");
 
-				parseLinkIndex(links, (index + 1), callback);
+				parseLinkIndex(links, (index + 1), fetchIngredients, callback);
 			}else if(callback != undefined){
-				callback(null, ingredients, links[index].pagemap.cse_image[0].src);
+				return callback(null, ingredients, links[index].pagemap.cse_image[0].src);
 			}
 		} else {
 			console.log("error fetching " + link + "\n\n");
 
 			//we could have encountered an error for numerous reasons, we'll just try the next link
-			parseLinkIndex(links, (index + 1), callback);
+			parseLinkIndex(links, (index + 1), fetchIngredients, callback);
 		}
 	});
 
 }
 
-searchForProductIngredients = function (productName, callback) {
+searchForProductIngredients = function (productName, fetchIngredients, callback) {
 
 var url = "https://www.googleapis.com/customsearch/v1?key=AIzaSyBPQh3L3yqwrvzm4tSV4sBgBakCpt-IQ2g&cx=006662848666275934582:hm0cll0o6jg&q=" + encodeURIComponent(productName) + "&fields=items(title,link,pagemap(cse_image))";
 
@@ -157,7 +161,7 @@ baseRequest(url, function(error, response, body) {
 	if (!error && response.statusCode == 200) {
 
 		//and then go ahead and parse the resulting list at the first index
-		parseLinkIndex(JSON.parse(body).items, 0, callback);
+		parseLinkIndex(JSON.parse(body).items, 0, fetchIngredients, callback);
 
 
 	}else{

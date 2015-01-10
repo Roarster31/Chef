@@ -35,14 +35,14 @@ app.get('/', function(req, res) {
 			result.productName = productName;
 			result.sources.name = "digit-eyes";
 
-			if(result.ingredients){
+			if(searchForProductIngredients){
 				result.ingredients = ingredients;
 				result.sources.ingredients = "digit-eyes";
 			}
 
 
 				console.log("beginning Google search (from digit-eyes)");
-				productSearch.searchForProductIngredients(productName, googleSearchCallback);
+				productSearch.searchForProductIngredients(productName, (result.ingredients == undefined), googleSearchCallback);
 
 		}
 
@@ -66,7 +66,7 @@ app.get('/', function(req, res) {
 
 
 					console.log("beginning Google search (from ean-search)");
-					productSearch.searchForProductIngredients(productName, googleSearchCallback);
+					productSearch.searchForProductIngredients(productName, true, googleSearchCallback);
 
 			}
 
