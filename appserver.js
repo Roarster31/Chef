@@ -1,7 +1,7 @@
 var express = require('express'),
-	eanTool = require('./clEANer'),
-	digitiserTool = require('./digitiser'),
-	ingredientsTool = require('./nodebase')
+	eanTool = require('./eanSearch'),
+	digitiserTool = require('./eanSearchV2'),
+	ingredientsTool = require('./productDataSearch')
 var app = express()
 
 app.get('/', function(req, res) {
