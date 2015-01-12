@@ -14,6 +14,7 @@
 		7A4010C41A5C9D6900D8FFA2 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7A4010C21A5C9D6900D8FFA2 /* LaunchScreen.xib */; };
 		7A4010D01A5C9D6900D8FFA2 /* SousChefTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A4010CF1A5C9D6900D8FFA2 /* SousChefTests.swift */; };
 		7A4010DA1A5C9E6900D8FFA2 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7A4010D91A5C9E6900D8FFA2 /* AVFoundation.framework */; };
+		7A4010DC1A5D9DFF00D8FFA2 /* DataView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A4010DB1A5D9DFE00D8FFA2 /* DataView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -38,6 +39,7 @@
 		7A4010CE1A5C9D6900D8FFA2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7A4010CF1A5C9D6900D8FFA2 /* SousChefTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SousChefTests.swift; sourceTree = "<group>"; };
 		7A4010D91A5C9E6900D8FFA2 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		7A4010DB1A5D9DFE00D8FFA2 /* DataView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -87,6 +89,7 @@
 				7A4010C01A5C9D6800D8FFA2 /* Images.xcassets */,
 				7A4010C21A5C9D6900D8FFA2 /* LaunchScreen.xib */,
 				7A4010B71A5C9D6800D8FFA2 /* Supporting Files */,
+				7A4010DB1A5D9DFE00D8FFA2 /* DataView.swift */,
 			);
 			path = SousChef;
 			sourceTree = "<group>";
@@ -216,6 +219,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7A4010DC1A5D9DFF00D8FFA2 /* DataView.swift in Sources */,
 				7A4010BC1A5C9D6800D8FFA2 /* ViewController.swift in Sources */,
 				7A4010BA1A5C9D6800D8FFA2 /* AppDelegate.swift in Sources */,
 			);

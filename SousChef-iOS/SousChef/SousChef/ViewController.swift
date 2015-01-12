@@ -25,8 +25,6 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
         // Initial Vars
         serverIP = "smithyproductions.noip.me"
         
-        
-        /*
         // Do any additional setup after loading the view, typically from a nib.
         // Get an instance of the AVCaptureDevice class to initialize a device object and provide the video
         // as the media type parameter.
@@ -79,8 +77,8 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
         qrCodeFrameView?.layer.borderWidth = 2
         view.addSubview(qrCodeFrameView!)
         view.bringSubviewToFront(qrCodeFrameView!)
-*/
-        getEANDetails("8715700414409")
+
+        getEANDetails("9780230579835")
         
     }
 
@@ -135,12 +133,21 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
                 var error: NSError?
                 let productDict = NSJSONSerialization.JSONObjectWithData(data, options: nil, error: &error) as NSDictionary
                 
-                // Test to see whether the product was found
+                // Test to see whether the data was received as expected
                 if (productDict.count > 0 && productDict.count > 0){
+                    
+                    // Test to see whether there was an error
                     var responseErrors: NSArray = productDict["errors"] as NSArray
                     if(responseErrors[0] as NSString == "errors"){
                         println("No Product Found")
+                    } else {
+                        // All ok
+                        let viewController:UIViewController = UIStoryboard(name: "Main", bundle: nil).instantiateViewControllerWithIdentifier("dataViewController") as UIViewController
+                        // .instantiatViewControllerWithIdentifier() returns AnyObject! this must be downcast to utilize it
+                        
+                        self.presentViewController(viewController, animated: false, completion: nil)
                     }
+                    
                 }
                 
                 
